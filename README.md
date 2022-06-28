@@ -31,10 +31,9 @@ Improvements:
 1. Implement Protocol Buffers for tighter request and response schemas
 2. Better separation of duties between server and data layer
 3. Add endpoints for the U(pdate) and D(elete) in CRUD
-4. Slug identifiers instead of database's direct ID
-5. Configurable server options (database, port, etc)
-6. Middleware: logging, request ids, auth
-7. Better testing with cleaner mock data and more coverage
+4. Configurable server options (database, port, etc)
+5. Middleware: logging, request ids, auth
+6. Better testing with cleaner mock data and more coverage
 
 ## Running
 
@@ -70,7 +69,10 @@ List  services
             "description": "",
             "versions": [1, 2]
         }
-    ]
+    ],
+    "count": 3,
+    "prev": "",
+    "next": "1"
 }
 ```
 

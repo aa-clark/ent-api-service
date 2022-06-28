@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,6 +23,7 @@ const (
 	ErrorInternal      = "internal server error"
 	ErrorNotFound      = "resource not found"
 	ErrorBadIdentifier = "invalid service identifier"
+	ErrorInvalidPage   = "invalid page"
 )
 
 type Server struct {
@@ -38,6 +40,9 @@ type GetServiceReply struct {
 
 type ListServicesReply struct {
 	Services []GetServiceReply `json:"services"`
+	Count    int               `json:"count"`
+	Prev     string            `json:"prev"`
+	Next     string            `json:"next"`
 }
 
 type AddServiceRequest struct {
@@ -100,8 +105,19 @@ func (s *Server) ListServicesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Out of bounds
-	if pageSize*pageNo > totalCount {
-		pageNo = 0
+	if pageSize*pageNo >= totalCount {
+		s.writeJSONError(w, http.StatusNotFound, ErrorInvalidPage)
+		return
+	}
+
+	prev := ""
+	if pageNo > 0 {
+		prev = fmt.Sprintf("%d", pageNo-1)
+	}
+
+	next := ""
+	if pageSize*pageNo <= totalCount {
+		next = fmt.Sprintf("%d", pageNo+1)
 	}
 
 	services, err := s.db.GetServices(r.Context(), pageSize*pageNo, pageSize, sortBy, orderBy, filter)
@@ -113,6 +129,9 @@ func (s *Server) ListServicesHandler(w http.ResponseWriter, r *http.Request) {
 
 	res := ListServicesReply{
 		Services: []GetServiceReply{},
+		Count:    totalCount,
+		Prev:     prev,
+		Next:     next,
 	}
 
 	for _, s := range services {
